@@ -2,7 +2,7 @@
 // @name         哔哩哔哩收藏夹修复
 // @namespace    @justorez
 // @homepage     https://github.com/justorez
-// @version      1.0.0
+// @version      1.0.1
 // @description  修复哔哩哔哩失效的收藏，可查看av号、简介、标题、封面等
 // @author       justorez
 // @license      GPL-3.0
@@ -85,10 +85,10 @@
                     link.classList.remove('disabled') // 移除禁用样式
                 })
 
-                addCopyAVCodeButton(el, aid) // 添加 avid 复制按钮
-                addCopyBVCodeButton(el, bv) // 添加 bvid 复制按钮
                 fixTitleAndCover(el, alinks[1], aid) // 修复标题和封面
                 el.classList.remove('disabled') // 移除禁用样式
+                addCopyAVCodeButton(el, aid) // 添加 avid 复制按钮
+                addCopyBVCodeButton(el, bv) // 添加 bvid 复制按钮
             })
 
             showDetail(list)
@@ -103,6 +103,10 @@
      * @param {Function} fn
      */
     function addOperation(item, name, fn) {
+        if (item.classList.contains('disabled')) {
+            return
+        }
+
         const ul = item.querySelector('.be-dropdown-menu')
         const lastChild = ul.children[ul.children.length - 1]
 
@@ -256,9 +260,6 @@
      */
     function fixTitleAndCover(item, link, aid) {
         link.textContent = '加载中...'
-        // const url = `https://www.biliplus.com/api/view?id=${aid}`
-        // const response = await fetch(url, { mode: 'no-cors' })
-        // const res = await response.json()
 
         GM_xmlhttpRequest({
             url: `https://www.biliplus.com/api/view?id=${aid}`,
@@ -288,7 +289,7 @@
     /**
      * 显示详情
      *
-     * @param {NodeListOf<Element>} list 失效收藏节点列表
+     * @param {Element} list 失效收藏节点列表
      */
     async function showDetail(list) {
         const fidRegex = window.location.href.match(/fid=(\d+)/)
@@ -302,7 +303,6 @@
         ).textContent
 
         // 该接口已失效：https://api.bilibili.com/medialist/gateway/base/spaceDetail?media_id=${fid}&pn=${pn}&ps=20&keyword=&order=mtime&type=0&tid=0&jsonp=jsonp
-
         const url = `https://api.bilibili.com/x/v3/fav/resource/list?media_id=${fid}&pn=${pn}&ps=20&keyword=&order=mtime&type=0&tid=0&platform=web`
         const response = await fetch(url, { credentials: 'include' })
         const json = await response.json()
